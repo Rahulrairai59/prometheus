@@ -1148,7 +1148,7 @@ func (a *appenderBase) log() error {
 	a.mtx.RLock()
 	defer a.mtx.RUnlock()
 
-	encoder := record.Encoder{STPerSample: a.opts.EnableSTStorage}
+	encoder := record.Encoder{EnableSTStorage: a.opts.EnableSTStorage}
 	buf := a.bufPool.Get().([]byte)
 	defer func() {
 		a.bufPool.Put(buf) //nolint:staticcheck
@@ -1273,7 +1273,7 @@ func (a *appenderBase) logSeries() error {
 			a.bufPool.Put(buf) //nolint:staticcheck
 		}()
 
-		encoder := record.Encoder{STPerSample: a.opts.EnableSTStorage}
+		encoder := record.Encoder{EnableSTStorage: a.opts.EnableSTStorage}
 		buf = encoder.Series(a.pendingSeries, buf)
 		if err := a.wal.Log(buf); err != nil {
 			return err

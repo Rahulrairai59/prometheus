@@ -2190,7 +2190,7 @@ func TestChunkSnapshot_AppenderV2(t *testing.T) {
 		require.NoError(t, app.Commit())
 
 		// Add some tombstones.
-		enc := record.Encoder{STPerSample: true}
+		enc := record.Encoder{EnableSTStorage: true}
 		for i := 1; i <= numSeries; i++ {
 			ref := storage.SeriesRef(i)
 			itvs := tombstones.Intervals{
@@ -2268,7 +2268,7 @@ func TestChunkSnapshot_AppenderV2(t *testing.T) {
 		require.NoError(t, app.Commit())
 
 		// Add more tombstones.
-		enc := record.Encoder{STPerSample: true}
+		enc := record.Encoder{EnableSTStorage: true}
 		for i := 1; i <= numSeries; i++ {
 			ref := storage.SeriesRef(i)
 			itvs := tombstones.Intervals{

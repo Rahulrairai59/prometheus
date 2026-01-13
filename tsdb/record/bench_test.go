@@ -35,7 +35,7 @@ func TestEncodeDecode(t *testing.T) {
 		var (
 			dec record.Decoder
 			buf []byte
-			enc = record.Encoder{STPerSample: true}
+			enc = record.Encoder{EnableSTStorage: true}
 		)
 
 		s := testrecord.GenTestRefSamplesCase(t, tcase)
@@ -105,7 +105,7 @@ func BenchmarkEncode_Samples(b *testing.B) {
 			b.Run(fmt.Sprintf("compr=%v/data=%v", compr, data), func(b *testing.B) {
 				var (
 					samples = testrecord.GenTestRefSamplesCase(b, data)
-					enc     = record.Encoder{STPerSample: UseV2}
+					enc     = record.Encoder{EnableSTStorage: UseV2}
 					buf     []byte
 					cBuf    []byte
 				)
@@ -120,7 +120,7 @@ func BenchmarkEncode_Samples(b *testing.B) {
 
 				b.ReportAllocs()
 				b.ResetTimer()
-				for i := 0; i < b.N; i++ {
+				for b.Loop() {
 					buf = enc.Samples(samples, buf[:0])
 					b.ReportMetric(float64(len(buf)), "B/rec")
 
@@ -144,7 +144,7 @@ func BenchmarkDecode_Samples(b *testing.B) {
 			b.Run(fmt.Sprintf("compr=%v/data=%v", compr, data), func(b *testing.B) {
 				var (
 					samples    = testrecord.GenTestRefSamplesCase(b, data)
-					enc        = record.Encoder{STPerSample: UseV2}
+					enc        = record.Encoder{EnableSTStorage: UseV2}
 					dec        record.Decoder
 					cDec       = compression.NewDecoder()
 					cBuf       []byte
@@ -167,7 +167,7 @@ func BenchmarkDecode_Samples(b *testing.B) {
 
 				b.ReportAllocs()
 				b.ResetTimer()
-				for i := 0; i < b.N; i++ {
+				for b.Loop() {
 					cBuf, _ = cDec.Decode(compr, buf, cBuf[:0])
 					samplesBuf, _ = dec.Samples(cBuf, samplesBuf[:0])
 				}

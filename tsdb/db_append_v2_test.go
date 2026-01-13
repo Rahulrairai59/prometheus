@@ -985,7 +985,7 @@ func testWALReplayRaceOnSamplesLoggedBeforeSeriesAppendV2(t *testing.T, numSampl
 
 	for seriesRef := 1; seriesRef <= numSeries; seriesRef++ {
 		// Log samples before the series is logged to the WAL.
-		enc := record.Encoder{STPerSample: true}
+		enc := record.Encoder{EnableSTStorage: true}
 		var samples []record.RefSample
 
 		for ts := range numSamplesBeforeSeriesCreation {
@@ -1506,7 +1506,7 @@ func TestInitializeHeadTimestamp_AppendV2(t *testing.T) {
 		w, err := wlog.New(nil, nil, path.Join(dir, "wal"), compression.None)
 		require.NoError(t, err)
 
-		enc := record.Encoder{STPerSample: true}
+		enc := record.Encoder{EnableSTStorage: true}
 		err = w.Log(
 			enc.Series([]record.RefSeries{
 				{Ref: 123, Labels: labels.FromStrings("a", "1")},
@@ -1546,7 +1546,7 @@ func TestInitializeHeadTimestamp_AppendV2(t *testing.T) {
 		w, err := wlog.New(nil, nil, path.Join(dir, "wal"), compression.None)
 		require.NoError(t, err)
 
-		enc := record.Encoder{STPerSample: true}
+		enc := record.Encoder{EnableSTStorage: true}
 		err = w.Log(
 			enc.Series([]record.RefSeries{
 				{Ref: 123, Labels: labels.FromStrings("a", "1")},

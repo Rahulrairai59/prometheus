@@ -1602,7 +1602,7 @@ func (h *Head) Delete(ctx context.Context, mint, maxt int64, ms ...*labels.Match
 	}
 
 	if h.wal != nil {
-		enc := record.Encoder{STPerSample: h.opts.EnableSTStorage}
+		enc := record.Encoder{EnableSTStorage: h.opts.EnableSTStorage}
 		if err := h.wal.Log(enc.Tombstones(stones, nil)); err != nil {
 			return err
 		}

@@ -88,7 +88,7 @@ func TestRecord_EncodeDecode(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, samples, decSamples)
 
-	enc = Encoder{STPerSample: true}
+	enc = Encoder{EnableSTStorage: true}
 	// Without ST again, but with V1 encoder that enables SamplesV2
 	samples = []RefSample{
 		{Ref: 0, T: 12423423, V: 1.2345},
@@ -277,7 +277,7 @@ func TestRecord_EncodeDecode(t *testing.T) {
 func TestRecord_DecodeInvalidHistogramSchema(t *testing.T) {
 	for _, schema := range []int32{-100, 100} {
 		t.Run(fmt.Sprintf("schema=%d", schema), func(t *testing.T) {
-			enc := Encoder{STPerSample: true}
+			enc := Encoder{EnableSTStorage: true}
 
 			var output bytes.Buffer
 			logger := promslog.New(&promslog.Config{Writer: &output})
@@ -312,7 +312,7 @@ func TestRecord_DecodeInvalidHistogramSchema(t *testing.T) {
 func TestRecord_DecodeInvalidFloatHistogramSchema(t *testing.T) {
 	for _, schema := range []int32{-100, 100} {
 		t.Run(fmt.Sprintf("schema=%d", schema), func(t *testing.T) {
-			enc := Encoder{STPerSample: true}
+			enc := Encoder{EnableSTStorage: true}
 
 			var output bytes.Buffer
 			logger := promslog.New(&promslog.Config{Writer: &output})
@@ -347,7 +347,7 @@ func TestRecord_DecodeInvalidFloatHistogramSchema(t *testing.T) {
 func TestRecord_DecodeTooHighResolutionHistogramSchema(t *testing.T) {
 	for _, schema := range []int32{9, 52} {
 		t.Run(fmt.Sprintf("schema=%d", schema), func(t *testing.T) {
-			enc := Encoder{STPerSample: true}
+			enc := Encoder{EnableSTStorage: true}
 
 			var output bytes.Buffer
 			logger := promslog.New(&promslog.Config{Writer: &output})
@@ -382,7 +382,7 @@ func TestRecord_DecodeTooHighResolutionHistogramSchema(t *testing.T) {
 func TestRecord_DecodeTooHighResolutionFloatHistogramSchema(t *testing.T) {
 	for _, schema := range []int32{9, 52} {
 		t.Run(fmt.Sprintf("schema=%d", schema), func(t *testing.T) {
-			enc := Encoder{STPerSample: true}
+			enc := Encoder{EnableSTStorage: true}
 
 			var output bytes.Buffer
 			logger := promslog.New(&promslog.Config{Writer: &output})
@@ -417,7 +417,7 @@ func TestRecord_DecodeTooHighResolutionFloatHistogramSchema(t *testing.T) {
 // TestRecord_Corrupted ensures that corrupted records return the correct error.
 // Bugfix check for pull/521 and pull/523.
 func TestRecord_Corrupted(t *testing.T) {
-	enc := Encoder{STPerSample: true}
+	enc := Encoder{EnableSTStorage: true}
 	dec := NewDecoder(labels.NewSymbolTable(), promslog.NewNopLogger())
 
 	t.Run("Test corrupted series record", func(t *testing.T) {
@@ -535,8 +535,8 @@ func TestRecord_Type(t *testing.T) {
 	recordType = dec.Type(enc.Samples(samples, nil))
 	require.Equal(t, Samples, recordType)
 
-	// With STPerSample set, all Samples are V2
-	enc = Encoder{STPerSample: true}
+	// With EnableSTStorage set, all Samples are V2
+	enc = Encoder{EnableSTStorage: true}
 	samples = []RefSample{{Ref: 123, T: 12345, V: 1.2345}}
 	recordType = dec.Type(enc.Samples(samples, nil))
 	require.Equal(t, SamplesV2, recordType)
@@ -779,7 +779,7 @@ func BenchmarkWAL_HistogramEncoding(b *testing.B) {
 				for _, buckets := range []int{0, 1, 10, 100} {
 					b.Run(fmt.Sprintf("type=%s/labels=%d/histograms=%d/buckets=%d", maker.name, labelCount, histograms, buckets), func(b *testing.B) {
 						series, samples, nhcbs := maker.make(labelCount, histograms, buckets)
-						enc := Encoder{STPerSample: true}
+						enc := Encoder{EnableSTStorage: true}
 						for b.Loop() {
 							var buf []byte
 							enc.Series(series, buf)

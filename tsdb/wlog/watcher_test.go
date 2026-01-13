@@ -153,7 +153,7 @@ func TestTailSamples(t *testing.T) {
 			err := os.Mkdir(wdir, 0o777)
 			require.NoError(t, err)
 
-			enc := record.Encoder{STPerSample: true}
+			enc := record.Encoder{EnableSTStorage: true}
 			w, err := NewSize(nil, nil, wdir, 128*pageSize, compress)
 			require.NoError(t, err)
 			defer func() {
@@ -306,7 +306,7 @@ func TestReadToEndNoCheckpoint(t *testing.T) {
 
 			var recs [][]byte
 
-			enc := record.Encoder{STPerSample: true}
+			enc := record.Encoder{EnableSTStorage: true}
 
 			for i := range seriesCount {
 				series := enc.Series([]record.RefSeries{
@@ -367,7 +367,7 @@ func TestReadToEndWithCheckpoint(t *testing.T) {
 			err := os.Mkdir(wdir, 0o777)
 			require.NoError(t, err)
 
-			enc := record.Encoder{STPerSample: true}
+			enc := record.Encoder{EnableSTStorage: true}
 			w, err := NewSize(nil, nil, wdir, segmentSize, compress)
 			require.NoError(t, err)
 			defer func() {
@@ -460,7 +460,7 @@ func TestReadCheckpoint(t *testing.T) {
 			require.NoError(t, err)
 			require.NoError(t, f.Close())
 
-			enc := record.Encoder{STPerSample: true}
+			enc := record.Encoder{EnableSTStorage: true}
 			w, err := NewSize(nil, nil, wdir, 128*pageSize, compress)
 			require.NoError(t, err)
 			t.Cleanup(func() {
@@ -529,7 +529,7 @@ func TestReadCheckpointMultipleSegments(t *testing.T) {
 			err := os.Mkdir(wdir, 0o777)
 			require.NoError(t, err)
 
-			enc := record.Encoder{STPerSample: true}
+			enc := record.Encoder{EnableSTStorage: true}
 			w, err := NewSize(nil, nil, wdir, pageSize, compress)
 			require.NoError(t, err)
 
@@ -607,7 +607,7 @@ func TestCheckpointSeriesReset(t *testing.T) {
 			err := os.Mkdir(wdir, 0o777)
 			require.NoError(t, err)
 
-			enc := record.Encoder{STPerSample: true}
+			enc := record.Encoder{EnableSTStorage: true}
 			w, err := NewSize(nil, nil, wdir, segmentSize, tc.compress)
 			require.NoError(t, err)
 			defer func() {
@@ -692,7 +692,7 @@ func TestRun_StartupTime(t *testing.T) {
 			err := os.Mkdir(wdir, 0o777)
 			require.NoError(t, err)
 
-			enc := record.Encoder{STPerSample: true}
+			enc := record.Encoder{EnableSTStorage: true}
 			w, err := NewSize(nil, nil, wdir, pageSize, compress)
 			require.NoError(t, err)
 
@@ -737,7 +737,7 @@ func TestRun_StartupTime(t *testing.T) {
 }
 
 func generateWALRecords(w *WL, segment, seriesCount, samplesCount int) error {
-	enc := record.Encoder{STPerSample: true}
+	enc := record.Encoder{EnableSTStorage: true}
 	for j := range seriesCount {
 		ref := j + (segment * 100)
 		series := enc.Series([]record.RefSeries{
