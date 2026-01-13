@@ -363,8 +363,8 @@ func (*Decoder) samplesV1(dec *encoding.Decbuf, samples []RefSample) ([]RefSampl
 	return samples, nil
 }
 
-// SamplesV2 appends samples in rec to the given slice using the V2 algorithm,
-// which is more efficient. (See Encoder.samplesV2 definition).
+// SamplesV2 appends samples in rec to the given slice using the V2 algorithm.
+// (See Encoder.samplesV2 definition).
 func (*Decoder) samplesV2(dec *encoding.Decbuf, samples []RefSample) ([]RefSample, error) {
 	if dec.Len() == 0 {
 		return samples, nil
@@ -726,8 +726,8 @@ func DecodeFloatHistogram(buf *encoding.Decbuf, fh *histogram.FloatHistogram) {
 // Encoder encodes series, sample, and tombstones records.
 // The zero value is ready to use.
 type Encoder struct {
-	// STPerSample enables the SamplesV2 encoding, which is more efficient
-	// than V1 and supports start time per sample.
+	// STPerSample enables the SamplesV2 encoding, which supports start time per
+	// sample.
 	STPerSample bool
 }
 
@@ -815,9 +815,8 @@ const (
 	explicitST             // Start time is an explicit value, delta to first timestamp (or last ST??)
 )
 
-// SamplesV2 appends the encoded samples to b and returns the resulting slice
-// using a more efficient per-sample delta encoding and allows for Start Time
-// storage.
+// SamplesV2 appends the encoded samples to b, including Start Timesamp per
+// sample, and returns the resulting slice.
 func (*Encoder) samplesV2(samples []RefSample, b []byte) []byte {
 	buf := encoding.Encbuf{B: b}
 	buf.PutByte(byte(SamplesV2))

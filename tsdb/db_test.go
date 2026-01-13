@@ -1596,7 +1596,7 @@ func TestSizeRetention(t *testing.T) {
 	// Create a WAL checkpoint, and compare sizes.
 	first, last, err := wlog.Segments(db.Head().wal.Dir())
 	require.NoError(t, err)
-	_, err = wlog.Checkpoint(promslog.NewNopLogger(), db.Head().wal, first, last-1, func(chunks.HeadSeriesRef) bool { return false }, 0, db.Head().opts.EnableStartTimePerSample)
+	_, err = wlog.Checkpoint(promslog.NewNopLogger(), db.Head().wal, first, last-1, func(chunks.HeadSeriesRef) bool { return false }, 0, db.Head().opts.EnableSTStorage)
 	require.NoError(t, err)
 	blockSize = int64(prom_testutil.ToFloat64(db.metrics.blocksBytes)) // Use the actual internal metrics.
 	walSize, err = db.Head().wal.Size()

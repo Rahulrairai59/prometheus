@@ -202,10 +202,10 @@ type HeadOptions struct {
 	// is implemented.
 	EnableMetadataWALRecords bool
 
-	// EnableStartTimePerSample determines whether databases (WAL/WBL, tsdb,
+	// EnableSTStorage determines whether databases (WAL/WBL, tsdb,
 	// agent) should set a Start Time value per sample. Currently not
 	// user-settable and only set in tests.
-	EnableStartTimePerSample bool
+	EnableSTStorage bool
 }
 
 const (
@@ -1355,7 +1355,7 @@ func (h *Head) truncateWAL(mint int64) error {
 	}
 
 	h.metrics.checkpointCreationTotal.Inc()
-	if _, err = wlog.Checkpoint(h.logger, h.wal, first, last, h.keepSeriesInWALCheckpointFn(mint), mint, h.opts.EnableStartTimePerSample); err != nil {
+	if _, err = wlog.Checkpoint(h.logger, h.wal, first, last, h.keepSeriesInWALCheckpointFn(mint), mint, h.opts.EnableSTStorage); err != nil {
 		h.metrics.checkpointCreationFail.Inc()
 		var cerr *chunks.CorruptionErr
 		if errors.As(err, &cerr) {
@@ -1602,7 +1602,7 @@ func (h *Head) Delete(ctx context.Context, mint, maxt int64, ms ...*labels.Match
 	}
 
 	if h.wal != nil {
-		enc := record.Encoder{STPerSample: h.opts.EnableStartTimePerSample}
+		enc := record.Encoder{STPerSample: h.opts.EnableSTStorage}
 		if err := h.wal.Log(enc.Tombstones(stones, nil)); err != nil {
 			return err
 		}

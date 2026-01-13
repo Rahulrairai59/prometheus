@@ -94,10 +94,10 @@ type Options struct {
 	// is implemented.
 	EnableSTAsZeroSample bool
 
-	// EnableStartTimePerSample determines whether databases (WAL/WBL, tsdb,
+	// EnableSTStorage determines whether databases (WAL/WBL, tsdb,
 	// agent) should set a Start Time value per sample. Currently not
 	// user-settable and only set in tests.
-	EnableStartTimePerSample bool
+	EnableSTStorage bool
 }
 
 // DefaultOptions used for the WAL storage. They are reasonable for setups using
@@ -711,7 +711,7 @@ func (db *DB) truncate(mint int64) error {
 
 	db.metrics.checkpointCreationTotal.Inc()
 
-	if _, err = wlog.Checkpoint(db.logger, db.wal, first, last, db.keepSeriesInWALCheckpointFn(last), mint, db.opts.EnableStartTimePerSample); err != nil {
+	if _, err = wlog.Checkpoint(db.logger, db.wal, first, last, db.keepSeriesInWALCheckpointFn(last), mint, db.opts.EnableSTStorage); err != nil {
 		db.metrics.checkpointCreationFail.Inc()
 		var cerr *wlog.CorruptionErr
 		if errors.As(err, &cerr) {
@@ -1148,7 +1148,7 @@ func (a *appenderBase) log() error {
 	a.mtx.RLock()
 	defer a.mtx.RUnlock()
 
-	encoder := record.Encoder{STPerSample: a.opts.EnableStartTimePerSample}
+	encoder := record.Encoder{STPerSample: a.opts.EnableSTStorage}
 	buf := a.bufPool.Get().([]byte)
 	defer func() {
 		a.bufPool.Put(buf) //nolint:staticcheck
@@ -1273,7 +1273,7 @@ func (a *appenderBase) logSeries() error {
 			a.bufPool.Put(buf) //nolint:staticcheck
 		}()
 
-		encoder := record.Encoder{STPerSample: a.opts.EnableStartTimePerSample}
+		encoder := record.Encoder{STPerSample: a.opts.EnableSTStorage}
 		buf = encoder.Series(a.pendingSeries, buf)
 		if err := a.wal.Log(buf); err != nil {
 			return err
