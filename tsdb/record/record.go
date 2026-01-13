@@ -58,7 +58,7 @@ const (
 	CustomBucketsHistogramSamples Type = 9
 	// CustomBucketsFloatHistogramSamples is used to match WAL records of type Float Histogram with custom buckets.
 	CustomBucketsFloatHistogramSamples Type = 10
-	// SamplesV2 is an enhanced sample record with a different encoding scheme and allows storing an optional ST per sample.
+	// SamplesV2 is an enhanced sample record with an encoding scheme that allows storing float samples with timestamp and an optional ST per sample.
 	SamplesV2 Type = 11
 )
 
@@ -329,7 +329,7 @@ func (d *Decoder) Samples(rec []byte, samples []RefSample) ([]RefSample, error) 
 	}
 }
 
-// Samples appends samples in rec to the given slice.
+// samplesV1 appends samples in rec to the given slice, while ignoring ST information.
 func (*Decoder) samplesV1(dec *encoding.Decbuf, samples []RefSample) ([]RefSample, error) {
 	if dec.Len() == 0 {
 		return samples, nil
@@ -363,8 +363,8 @@ func (*Decoder) samplesV1(dec *encoding.Decbuf, samples []RefSample) ([]RefSampl
 	return samples, nil
 }
 
-// SamplesV2 appends samples in rec to the given slice using the V2 algorithm,
-// which is more efficient. (See Encoder.samplesV2 definition).
+// samplesV2 appends samples in rec to the given slice using the V2 algorithm,
+// which is more efficient and supports ST (See Encoder.samplesV2 definition).
 func (*Decoder) samplesV2(dec *encoding.Decbuf, samples []RefSample) ([]RefSample, error) {
 	if dec.Len() == 0 {
 		return samples, nil
@@ -726,9 +726,9 @@ func DecodeFloatHistogram(buf *encoding.Decbuf, fh *histogram.FloatHistogram) {
 // Encoder encodes series, sample, and tombstones records.
 // The zero value is ready to use.
 type Encoder struct {
-	// STPerSample enables the SamplesV2 encoding, which is more efficient
+	// EnableSTStorage enables the SamplesV2 encoding, which is more efficient
 	// than V1 and supports start time per sample.
-	STPerSample bool
+	EnableSTStorage bool
 }
 
 // Series appends the encoded series to b and returns the resulting slice.
@@ -808,15 +808,15 @@ func (*Encoder) samplesV1(samples []RefSample, b []byte) []byte {
 }
 
 const (
-	// Start time marker values for indicating trivial cases.
+	// Start timestamp marker values for indicating trivial cases.
 
-	noST       byte = iota // Sample has no start time
-	sameST                 // Sample time exists and is the same as the start time of the previous series.
-	explicitST             // Start time is an explicit value, delta to first timestamp (or last ST??)
+	noST       byte = iota // Sample has no start timestamp.
+	sameST                 // Sample timestamp exists and is the same as the start timestamp of the previous series.
+	explicitST             // Explicit start timestamp value, delta to first timestamp.
 )
 
-// SamplesV2 appends the encoded samples to b and returns the resulting slice
-// using a more efficient per-sample delta encoding and allows for Start Time
+// samplesV2 appends the encoded samples to b and returns the resulting slice
+// using a more efficient per-sample delta encoding and allows for ST
 // storage.
 func (*Encoder) samplesV2(samples []RefSample, b []byte) []byte {
 	buf := encoding.Encbuf{B: b}
@@ -839,7 +839,7 @@ func (*Encoder) samplesV2(samples []RefSample, b []byte) []byte {
 	buf.PutBE64(math.Float64bits(first.V))
 
 	// Subsequent values are delta to the immediate previous values, and in the
-	// case of start time, use the marker byte to indicate what the value should
+	// case of start timestamp, use the marker byte to indicate what the value should
 	// be if it's one of the trivial cases.
 	for i := 1; i < len(samples); i++ {
 		s := samples[i]

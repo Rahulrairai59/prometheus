@@ -191,7 +191,7 @@ func BenchmarkDecode_Samples(b *testing.B) {
 
 				b.ReportAllocs()
 				b.ResetTimer()
-				for i := 0; i < b.N; i++ {
+				for b.Loop() {
 					cBuf, _ = cDec.Decode(compr, buf, cBuf[:0])
 					samplesBuf, _ = dec.Samples(cBuf, samplesBuf[:0])
 				}
