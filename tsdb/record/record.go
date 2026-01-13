@@ -826,7 +826,7 @@ func (*Encoder) samplesV2(samples []RefSample, b []byte) []byte {
 		return buf.Get()
 	}
 
-	// Store first ref, time, start time, and value.
+	// Store first ref, timestamp, ST, and value.
 	first := samples[0]
 	buf.PutVarint64(int64(first.Ref))
 	buf.PutVarint64(first.T)
