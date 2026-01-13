@@ -120,7 +120,7 @@ func BenchmarkEncode_Samples(b *testing.B) {
 
 				b.ReportAllocs()
 				b.ResetTimer()
-				for i := 0; i < b.N; i++ {
+				for b.Loop() {
 					buf = enc.Samples(samples, buf[:0])
 					b.ReportMetric(float64(len(buf)), "B/rec")
 
